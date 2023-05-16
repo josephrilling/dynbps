@@ -164,6 +164,7 @@ class BPS:
         n = self.n_j[-1,0]
         delta = self.delta
         mcmc_iter = self.mcmc_iter
+        p = self.p
         E_BPS = np.zeros(shape = [mcmc_iter, 1]) # posterior BPS mean
         V_BPS = np.zeros(shape = [mcmc_iter, 1]) # posterior BPS variance
         error = np.zeros(shape = [mcmc_iter, 1])
