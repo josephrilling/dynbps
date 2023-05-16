@@ -5,4 +5,7 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://josephrilling.github.io',
                 'git_url': 'https://github.com/josephrilling/dynbps',
                 'lib_path': 'dynbps'},
-  'syms': {'dynbps.core': {'dynbps.core.foo': ('core.html#foo', 'dynbps/core.py')}}}
+  'syms': { 'dynbps.BPS': { 'dynbps.BPS.BPS': ('bps.html#bps', 'dynbps/BPS.py'),
+                            'dynbps.BPS.BPS.__init__': ('bps.html#bps.__init__', 'dynbps/BPS.py'),
+                            'dynbps.BPS.BPS.fit': ('bps.html#bps.fit', 'dynbps/BPS.py'),
+                            'dynbps.BPS.BPS.predict': ('bps.html#bps.predict', 'dynbps/BPS.py')}}}
