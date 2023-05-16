@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "dynbps"
+  site-url: "https://josephrilling.github.io/dynbps"
+  description: "Python code for Dynamic BPS"
+  repo-branch: main
+  repo-url: "https://github.com/josephrilling/dynbps"
