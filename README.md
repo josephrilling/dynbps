@@ -13,8 +13,10 @@ pip install dynbps
 
 ## How to use
 
-Fill me in please! Don’t forget code examples:
+This is a test to make sure everything still works
 
 ``` python
 1+1
 ```
+
+    2
