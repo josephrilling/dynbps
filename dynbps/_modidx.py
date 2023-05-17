@@ -9,4 +9,4 @@ d = { 'settings': { 'branch': 'main',
                             'dynbps.BPS.BPS.__init__': ('bps.html#bps.__init__', 'dynbps/BPS.py'),
                             'dynbps.BPS.BPS.fit': ('bps.html#bps.fit', 'dynbps/BPS.py'),
                             'dynbps.BPS.BPS.predict': ('bps.html#bps.predict', 'dynbps/BPS.py')},
-            'dynbps.loadData': {}}}
+            'dynbps.loadData': {'dynbps.loadData.loadDataInf': ('loaddata.html#loaddatainf', 'dynbps/loadData.py')}}}
