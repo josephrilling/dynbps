@@ -3,3 +3,4 @@ website:
     contents:
       - index.ipynb
       - 00_BPS.ipynb
+      - 01_loadData.ipynb
