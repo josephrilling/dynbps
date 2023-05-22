@@ -45,9 +45,9 @@ class BPS:
             '''returns upper triangle of matrix'''
             return cholesky(A, lower = False)
 
-        y =self.y[0:-1]
-        a_j =self.a_j[0:-1,]
-        A_j =self.A_j[0:-1,]
+        y =self.y
+        a_j =self.a_j
+        A_j =self.A_j
         n_j =self.n_j 
         delta =self.delta 
         m_0 = self.m_0
@@ -152,16 +152,16 @@ class BPS:
         self.R_k_samples = R_k[(p * burn_in):, :]
         self.v_k_samples = v_k[burn_in:, :]
         self.a_k = self.a_k_samples.mean(axis=0)
-    def predict(self):
+    def predict(self,a_new, A_new, n_new):
         def std_var(x):
             return (x + np.transpose(x))/2
 
         def chol(A):
             '''returns upper triangle of matrix'''
             return cholesky(A, lower = False)
-        a = self.a_j[-1,:]
-        A = self.A_j[-1,:]
-        n = self.n_j[-1,0]
+        a = a_new
+        A = A_new
+        n = n_new
         delta = self.delta
         mcmc_iter = self.mcmc_iter
         p = self.p
@@ -175,11 +175,9 @@ class BPS:
             x_t = np.append(np.array([1]), a + lambda_ * np.matmul(np.random.normal(size = [1, self.p_x]), chol(std_var(np.diag(A)))))
             E_BPS[i] = np.matmul(x_t, self.a_k_samples[i, :])
             V_BPS[i] = np.matmul(x_t, np.matmul(self.R_k_samples[(p*i):(p*(i + 1)), :], x_t.reshape([x_t.shape[0], 1]))) + self.v_k_samples[i, :]
-            error[i] = self.y[-1] - E_BPS[i]
             #mlike[i, t] = np.exp(np.log(ss.gamma(0.5 * (nu[t] + 1))) - np.log(ss.gamma(0.5 * nu[t])) - 0.5 * np.log(np.pi * nu[t] * V_BPS[i, t]) - (0.5 * (nu[t] + 1)) * np.log(1 + 1/(nu[t] * V_BPS[i, t]) * (yI[t + 1] - E_BPS[i, t]))**2)
         self.prediction = E_BPS.mean()
         self.variance = V_BPS.mean()
-        self.error = error.mean()
-        result = [self.prediction, self.variance, self.error]
+        result = [self.prediction, self.variance]
         return(result)
         
