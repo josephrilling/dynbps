@@ -11,12 +11,155 @@ documentation.
 pip install dynbps
 ```
 
+## Background
+
+### Base Level Oveview
+
+Bayesian Predictive Synthesis (BPS) is an ensemble method, meant for
+aggregating and synthesizing density predictions from multiple
+agents/experts/judges. There is quite a wide field of literature for
+ensembling point forecasts, but point forecasts are very limited because
+they do not convey uncertainty. The shape and variance of a distribution
+is equally important as the mean. Therefore, consider soliciting density
+predictions from $J$ judges. Each judge, $j = 1,...,J$ gives a density
+$h_j(\cdot)$. The set of these predictions is
+$H = \{h_1(\cdot), ... , h_J(\cdot)\}$. We would like to predict an
+outcome $y$, given this information $H$. Typically, in Bayesian
+Analysis, we would find the posterior $p(y|H)$ and be done with it.
+However, the posterior is found via $p(y|H) \propto p(H|y)p(y)$, and
+$p(H|y)$ is either impossible to find or necessitates significant
+modeling assumptions, making the value highly subjective.
+
+If we introduce a latent variable $\vec{x}$, then we may be able to
+write the posterior as
+$$p(y|H) = \int_{\vec{x}}p(y|\vec{x}, H)p(\vec{x}|H)d\vec{x}$$
+
+If we set up the structure correctly, we could even have
+$(y|\vec{x}) \perp H$, making our above formula
+$$p(y|H) = \int_{\vec{x}}p(y|\vec{x})p(\vec{x}|H)d\vec{x}$$
+
+Let’s say that the latent variable $\vec{x}$ is a J-dimensional random
+variable from $\vec{x}\sim p(\vec{x}|H)$. The next question is how to we
+get $\vec{x} \sim p(\vec{x}|H)$? Quite simply, we can say these latent
+variables are “generated independently from the $h_j$”, that is
+$x_j \sim h_j(\cdot)$ for $j=1:J$, and then $\vec{x} = (x_1,..., x_J)$.
+Due do independence of the random draws, we can write:
+$$p(y|H) = \int_{\vec{x}}p(y|\vec{x})\prod_{j=1:J} h_j(x_j) d\vec{x}$$
+
+Now, how do we formulate $p(y|\vec{x})$? It’s actually not too
+complicated! We are given covariates $\vec{x}$, and asked to predict an
+outcome $y$. Therefore, we can use tools that we are all familiar with,
+such as a linear regression. One of the nice things about BPS is that
+this conditional density $p(y|\vec{x})$, or “synthesis function”, is not
+set in stone. There are limitless choices, and you can use your favorite
+method in this role. In traditional BPS literature, we use the symbol
+$\alpha(y|\vec{x})$ to represent this synthesis function.
+
+### Dynamic BPS
+
+This package implements a dynamic version of BPS. The synthesis function
+follows a dynamic linear model (Prado and West Chapter 4). A dynamic
+linear model (DLM) predicts a time series outcome $y_t$ for $t=1:T$, and
+can be described by a pair of equations. First there is an observation
+equation: $$y_t = \vec{F}_t\vec{\theta}_t + \nu_t$$ In the observation
+equation, $\vec{F}_t$ is the covariate vector. This vector is known and
+contains all the predictors. In BPS, an example is
+$\vec{F}_t = (1, x_{1,t}, x_{2,t}, ..., x_{J,t})$, where $x_{j,t}$ is a
+latent draw from Judge j’s prediction at time t, and 1 is a constant
+that allows for an intercept term. The $\vec{\theta}_t$ are unobserved
+states, which act as the coefficients to the covariates in $\vec{F}_t$.
+Finally, $\nu_t$ is the measurement noise. The coefficients, $\theta_t$,
+evolve via a second equation:
+$$\vec{\theta}_t = G_t\vec{\theta}_{t-1} + \vec{w}_t  $$
+
+$G_t$ is called the state evolution matrix, and $\vec{w}_t$ is noise in
+this process. In this implementation, $G_t =I$, and the states evolve
+via a random walk.
+
+This pair of equations describes the DLM that is our aforementioned
+synthesis function, which now varies through time
+$\alpha_t(y_t|\vec{x}_t)$
+
+Going through time, the math behind dynamic BPS is quite involved. An
+arxiv of the orginal paper by McAlinn and West can be found at
+https://arxiv.org/abs/1601.07463. In broad strokes, BPS works by
+sampling latent states from the posterior given by the DLM, and then
+builds the DLM using these states and continues to alternate between
+sampling building for the pre-specified number of MCMC iterations. This
+back and fourth is closely related to the Forward Filter Backwards
+Smoothing algorithm (Prado and West Chapter 4), and allows BPS to
+correct for agent biases, codependencies, and mispecifications
+
 ## How to use
 
-This is a test to make sure everything still works
+There are three steps to using this method. First, create an object
+using the training information. Second, use the .fit() method to fit the
+model to the training data. Finally, use the .predict() method, which
+takes the new agent means, variances, and degrees of freedom as
+arguments, to predict the outcome at time T+1. Inflation forecasting
+data, originally provided at
+https://www2.stat.duke.edu/~mw/mwsoftware/BPS/index.html, is made
+available through the dynbps package, and is used in this example
+
+### Step 0: Read in the data and set priors
 
 ``` python
-1+1
+yI, a, A, n = loadDataInf()
+T = yI.shape[0] # total time in analysis
+J = a.shape[1] # number of agents
+p = J + 1 # number of agents plus intercept
+# set priors
+delta = [0.95, 0.99] # discount factors 
+m_0 = np.ones(shape = [J + 1])/J # prior mean for agent coefficients 
+m_0[0] = 0 # prior mean for intercept
+C_0 = np.eye(p) * 1 # prior for covariance matrix
+n_0 = 1/(1 - delta[1]) # prior on BPS degrees of freedom
+s_0 = 0.01 # prior on BPS observation variance 
+burn_in, mcmc_iter = 20, 30 ## Recommended is 2000,3000!!!
+##The low burn in mcmc iter are due to time constraints while building this guide
 ```
 
-    2
+### Step 1: Create a BPS object
+
+``` python
+## Remove the last observation to prevent data leak
+yT = yI[0:-1]
+aT = a[0:-1,]
+AT = A[0:-1,]
+nT = n[0:-1,]
+model = BPS(yT,aT,AT,nT,delta,m_0,C_0,n_0,s_0,burn_in,mcmc_iter)
+```
+
+### Step 2: Fit the model
+
+Now that the object is created, we can fit the model using the .fit()
+method. The .fit() method will print out the current MCMC iteration
+every 1000 iterations. The total number of iterations is burn_in +
+mcmc_iter = 5000. This process may take a few minutes.
+
+``` python
+model.fit()
+```
+
+    0
+
+### Step 3: Predict the next outcome
+
+Finally, feed the new agent means $a$, variances $A$, and degrees of
+freedom $n$ into the .predict() method to get a predicted mean and
+variance for $y_{T+1}$.
+
+``` python
+a_new = a[-1,]
+A_new = A[-1,]
+n_new = n[-1,]
+answer = model.predict(a_new, A_new, n_new)
+predicted_mean = answer[0]
+predicted_variance = answer[1]
+
+print(predicted_mean)
+print(predicted_variance)
+```
+
+    1.585669933033572
+    0.017954619079080438
