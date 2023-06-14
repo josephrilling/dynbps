@@ -17,24 +17,43 @@ class BPS:
                  y:list, #The true values
                  a_j:'T by J matrix', #Each agent's predicted mean
                  A_j:'T by J matrix', #Each agent's predicted variance
-                 n_j:'T by J matrix', #Each agent's predicted degrees of freedom
-                 delta:list, #Discount factor on [state, observation]
-                 m_0:list, #Prior for coefficients of agent's
-                 C_0:"J by J matrix", #Prior for covariance of agent's
-                 n_0:list, #Prior for degrees of freedom
-                 s_0:float, #Prior for observation variance
-                 burn_in:int, #Iterations for burn in
-                 mcmc_iter:int): #Iterations to keep
+                 n_j:'T by J matrix'=None, #Each agent's predicted degrees of freedom
+                 delta:list = None, #Discount factor on [state, observation]
+                 m_0:list = None, #Prior for coefficients of agent's
+                 C_0:"J by J matrix"= None, #Prior for covariance of agent's
+                 n_0:list= None, #Prior for degrees of freedom
+                 s_0:float = None, #Prior for observation variance
+                 burn_in:int = None, #Iterations for burn in
+                 mcmc_iter:int = None): #Iterations to keep
         self.y = y
         self.a_j = a_j
         self.A_j = A_j
+        self.p_x = A_j.shape[1]
+        self.p = self.p_x+1
+        if n_j is None:
+            n_j = np.full(A_j.shape, 30)
         self.n_j = n_j
+        if delta is None:
+            delta = [0.95,0.99]
         self.delta = delta
+        if m_0 is None:
+            m0 = [0]*(self.p)
+            m0[1:] = [1/self.p_x]*(self.p_x)
         self.m_0 = m_0
+        if C_0 is None:
+            C_0 = np.eye(self.p) * 1 
         self.C_0 = C_0
+        if n_0 is None:
+            n_0 = 1/(1 - delta[1]) # prior on BPS degrees of freedom
         self.n_0 = n_0
+        if s_0 is None:
+            s_0 = 0.01 # prior on BPS observation variance 
         self.s_0 = s_0
+        if burn_in is None:
+            burn_in = 2000
         self.burn_in = burn_in
+        if mcmc_iter is None:
+            mcmc_iter = 3000
         self.mcmc_iter = mcmc_iter
     def fit(self):
                 
@@ -54,14 +73,12 @@ class BPS:
         C_0 =self.C_0
         n_0 =self.n_0 
         s_0 =self.s_0 
+        p = self.p
+        p_x = self.p_x
         burn_in = self.burn_in
         mcmc_iter = self.mcmc_iter
         mcmc_iter = self.burn_in + self.mcmc_iter
         T = y.shape[0]
-        p_x = a_j.shape[1]
-        p = p_x + 1
-        self.p = p
-        self.p_x= p_x
         m_t = np.zeros(shape = [T + 1, p])
         C_t = np.zeros(shape = [(T + 1) * p, p])
         n_t = np.zeros(shape = [T + 1, 1])
