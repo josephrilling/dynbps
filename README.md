@@ -43,7 +43,7 @@ variable from $\vec{x}\sim p(\vec{x}|H)$. The next question is how to we
 get $\vec{x} \sim p(\vec{x}|H)$? Quite simply, we can say these latent
 variables are “generated independently from the $h_j$”, that is
 $x_j \sim h_j(\cdot)$ for $j=1:J$, and then $\vec{x} = (x_1,..., x_J)$.
-Due do independence of the random draws, we can write:
+Due to independence of the random draws, we can write:
 $$p(y|H) = \int_{\vec{x}}p(y|\vec{x})\prod_{j=1:J} h_j(x_j) d\vec{x}$$
 
 Now, how do we formulate $p(y|\vec{x})$? It’s actually not too

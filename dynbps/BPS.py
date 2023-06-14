@@ -169,7 +169,9 @@ class BPS:
         self.R_k_samples = R_k[(p * burn_in):, :]
         self.v_k_samples = v_k[burn_in:, :]
         self.a_k = self.a_k_samples.mean(axis=0)
-    def predict(self,a_new, A_new, n_new):
+    def predict(self,a_new, A_new, n_new=None):
+        if n_new is None:
+            n_new = np.full(A_new.shape[1],30)
         def std_var(x):
             return (x + np.transpose(x))/2
 
