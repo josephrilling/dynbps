@@ -171,7 +171,7 @@ class BPS:
         self.a_k = self.a_k_samples.mean(axis=0)
     def predict(self,a_new, A_new, n_new=None):
         if n_new is None:
-            n_new = np.full(A_new.shape[1],30)
+            n_new = np.full(self.p_x,30)
         def std_var(x):
             return (x + np.transpose(x))/2
 
