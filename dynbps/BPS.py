@@ -37,8 +37,8 @@ class BPS:
             delta = [0.95,0.99]
         self.delta = delta
         if m_0 is None:
-            m0 = [0]*(self.p)
-            m0[1:] = [1/self.p_x]*(self.p_x)
+            m_0 = np.ones(shape = [self.p_x + 1])/self.p_x # prior mean for agent coefficients 
+            m_0[0] = 0 # prior mean for intercept
         self.m_0 = m_0
         if C_0 is None:
             C_0 = np.eye(self.p) * 1 
