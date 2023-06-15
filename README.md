@@ -281,7 +281,7 @@ w2 = np.exp(M2L)/(np.exp(M1L) + np.exp(M2L))
 a = np.tile(np.array(means), (100, 1)) ## Create input mean array for BPS
 A = np.tile(np.array(vars),(100,1)) ## Create input variance array for BPS
 
-model = BPS(y=Y[:-1,], a_j=a[:-1,], A_j = A[:-1,], s_0 = 1)
+model = BPS(y=Y[:-1,], a_j=a[:-1,], A_j = A[:-1,], s_0 = 1, mcmc_iter = 500, burn_in = 500)
 model.fit()
 bps_mean, bps_var = model.predict(a[-1,], A[-1,])
 
