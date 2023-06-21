@@ -22,7 +22,7 @@ predictions from $J$ judges. Each judge, $j = 1,...,J$ gives a density
 $h_j(\cdot)$. The set of these predictions is
 $H = \{h_1(\cdot), ... , h_J(\cdot)\}$. We would like to predict an
 outcome $y$, given this information $H$. Typically, in Bayesian
-Analysis, we would find the posterior $p(y|H)$ and be done with it.
+analysis, we would find the posterior $p(y|H)$ and be done with it.
 However, the posterior is found via $p(y|H) \propto p(H|y)p(y)$, and
 $p(H|y)$ is either impossible to find or necessitates significant
 modeling assumptions, making the value highly subjective.
@@ -144,6 +144,10 @@ model.fit()
 ```
 
     0
+    1000
+    2000
+    3000
+    4000
 
 ### Step 3: Predict the next outcome
 
@@ -163,8 +167,8 @@ print(predicted_mean)
 print(predicted_variance)
 ```
 
-    1.6148521005113348
-    0.01692679968009269
+    1.5999742312322198
+    0.01667075932173112
 
 ## Motivating Example
 
@@ -259,7 +263,7 @@ plt.legend()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-8-output-1.png)
+![](index_files/figure-commonmark/cell-7-output-1.png)
 
 From this plot, it is clear that no linear combination of densities with
 weights on the unit simplex will give a satisfactory result. In fact, no
@@ -310,14 +314,10 @@ plt.legend()
 ```
 
     0
-    1000
-    2000
-    3000
-    4000
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-9-output-3.png)
+![](index_files/figure-commonmark/cell-8-output-3.png)
 
 We see above that BMA converges to one of our mispecified agents. On the
 other hand, BPS is able to overcome the agent mispecification and give
