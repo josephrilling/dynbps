@@ -12,8 +12,8 @@ pip install dynbps
 
 ### Base Level Oveview
 
-Bayesian Predictive Synthesis (BPS) is an ensemble method, meant for
-aggregating and synthesizing density predictions from multiple
+Bayesian Predictive Synthesis (BPS) is an ensemble method designed to
+aggregate and synthesize density predictions from multiple
 agents/experts/judges. There is quite a wide field of literature for
 ensembling point forecasts, but point forecasts are very limited because
 they do not convey uncertainty. The shape and variance of a distribution
@@ -27,12 +27,11 @@ However, the posterior is found via $p(y|H) \propto p(H|y)p(y)$, and
 $p(H|y)$ is either impossible to find or necessitates significant
 modeling assumptions, making the value highly subjective.
 
-If we introduce a latent variable $\vec{x}$, then we may be able to
-write the posterior as
+If we introduce a latent variable $\vec{x}$, then we can write the
+posterior as
 $$p(y|H) = \int_{\vec{x}}p(y|\vec{x}, H)p(\vec{x}|H)d\vec{x}$$
 
-If we set up the structure correctly, we could even have
-$(y|\vec{x}) \perp H$, making our above formula
+We can also assume $(y|\vec{x}) \perp H$, simplifying the posterior
 $$p(y|H) = \int_{\vec{x}}p(y|\vec{x})p(\vec{x}|H)d\vec{x}$$
 
 Let’s say that the latent variable $\vec{x}$ is a J-dimensional random
@@ -65,8 +64,8 @@ $\vec{F}_t = (1, x_{1,t}, x_{2,t}, ..., x_{J,t})$, where $x_{j,t}$ is a
 latent draw from Judge j’s prediction at time t, and 1 is a constant
 that allows for an intercept term. The $\vec{\theta}_t$ are unobserved
 states, which act as the coefficients to the covariates in $\vec{F}_t$.
-Finally, $\nu_t$ is the measurement noise. The coefficients, $\theta_t$,
-evolve via a second equation:
+Finally, $\nu_t$ is the measurement noise. The coefficients,
+$\vec{\theta}_t$, evolve via a second equation:
 $$\vec{\theta}_t = G_t\vec{\theta}_{t-1} + \vec{w}_t  $$
 
 $G_t$ is called the state evolution matrix, and $\vec{w}_t$ is noise in
@@ -82,8 +81,8 @@ arxiv of the orginal paper by McAlinn and West can be found at
 https://arxiv.org/abs/1601.07463. In broad strokes, BPS works by
 sampling latent states from the posterior given by the DLM, and then
 builds the DLM using these states and continues to alternate between
-sampling building for the pre-specified number of MCMC iterations. This
-back and fourth is closely related to the Forward Filter Backwards
+sampling and building for the pre-specified number of MCMC iterations.
+This back and fourth is closely related to the Forward Filter Backwards
 Smoothing algorithm (Prado and West Chapter 4), and allows BPS to
 correct for agent biases, codependencies, and mispecifications
 
@@ -112,11 +111,17 @@ m_0[0] = 0 # prior mean for intercept
 C_0 = np.eye(p) * 1 # prior for covariance matrix
 n_0 = 1/(1 - delta[1]) # prior on BPS degrees of freedom
 s_0 = 0.01 # prior on BPS observation variance 
-burn_in, mcmc_iter = 20, 30 ## Recommended is 2000,3000!!!
-##The low burn in mcmc iter are due to time constraints while building this guide
+burn_in, mcmc_iter = 2000, 3000
 ```
 
 ### Step 1: Create a BPS object
+
+When creating the BPS object, I provide all inputs. The user must
+specify the first three inputs: target series, agent means, and agent
+variances. If the degrees of freedom are not given, they default to 30,
+effectively implementing a normal distribution instead of a
+t-distribution. The default entries for all other parameters are equal
+to their respective values in the code above.
 
 ``` python
 ## Remove the last observation to prevent data leak
@@ -175,17 +180,24 @@ $$w_k = P(A_k|D) = \frac{P(D|A_k)P(A_k)}{\sum_{j=1:J} P(D|A_j)P(A_j)}$$
 
 This linear combination of the densities is intuitive and useful, but it
 is ultimately underparametrized. When the agents are correlated and/or
-misspecified, the linear combination of the densities fail struggle. In
-many cases, linear combination methods converge to one singular model
-(the one that has performed best so far), throwing away the potential
+misspecified, the linear combination of the densities struggles. In many
+cases, linear combination methods converge to one singular model (the
+one that has performed best so far), throwing away the potential
 information in the correlation structure of the agent predictions.
 Furthermore, in the likely situation where the forecasting problem is
-$M-open$, (none of the models are correct) the underparamterization of
-the ensemble is exaccerbated.
+“$M-open$”, (none of the models are correct) the underparamterization of
+the ensemble is exacerbated.
 
 In this section, I present a simple motivating example that I hope will
 educate the reader on latent synthesis, and bolster their understanding
-of BPS.
+of BPS. This example is in the “$M-open$” setting, where all agents are
+incorrected. The agents are not correlated, and are constant through
+time. These simplifications are intentional, and are designed to
+highlight the advantages of latent synthesis. I want to acknowledge that
+there are many examples where BMA and other linear density combinations
+have been used to great success. However, this example highlights a
+weakness in linear combination, one that we should not ignore in more
+complicated applications.
 
 Consider the following data generating process $$Y = 0.5*X_1 + 0.5*X_2$$
 where $X_1$ and $X_2$ are unobserved variables that are correlated via a
@@ -198,13 +210,13 @@ X_1 \\ X_2 \end{pmatrix}\sim N\bigg(\begin{pmatrix}
 0.5 & 1
 \end{pmatrix}\bigg)$$
 
-Assume that a decision maker that wants to use two agents in an
-ensemble. Agent 1 always submits density forecast
-$h_1(\cdot) := N(1,1)$, and Agent 2 always submits $h_2(\cdot):=N(4,1)$.
-The agents struggle at predicting $Y$, but they perfectly describe the
-marginal distributions of $X_1$, and $X_2$. Therefore, the decision
-maker has all the necessary information to create a strong ensemble
-forecast for $Y$.
+Assume that there are 100 observations of $Y$ and a decision maker wants
+to use two agents in an ensemble. Agent 1 always submits density
+forecast $h_1(\cdot) := N(1,1)$, and Agent 2 always submits
+$h_2(\cdot):=N(4,1)$. The agents struggle at predicting $Y$, but they
+perfectly describe the marginal distributions of $X_1$, and $X_2$.
+Therefore, the decision maker has all the necessary information to
+create a reasonable ensemble forecast for $Y$.
 
 ``` python
 #### Code for Generating Y
@@ -239,7 +251,7 @@ dist_space = linspace( -3, 8, 1000 ) ## For evaluation of the KDE for Y
 plt.plot(dist_space, norm.pdf(dist_space, loc = means[0], scale = 1), color = "darkgreen", alpha = 0.9, label = "Agents")
 plt.plot(dist_space, norm.pdf(dist_space, loc = means[1], scale = 1), color = "darkgreen", alpha = 0.9)
 plt.plot(dist_space, norm.pdf(dist_space, loc = mu_true, scale =sd_true)[0], color = "black", label = "Truth")
-plt.plot(dist_space, gaussian_kde(Y)(dist_space), color = "gray", label = "Oberseved")
+plt.plot(dist_space, gaussian_kde(Y)(dist_space), color = "gray", label = "Observed")
 for j in range(0,11):
   plt.plot(dist_space, (j/10)*norm.pdf(dist_space, loc = means[0], scale = 1) + ((10-j)/10)*norm.pdf(dist_space, loc = means[1], scale = 1), color = "red", alpha = .2)
 plt.title("Possible Combinations")
@@ -256,7 +268,7 @@ the distribution of $Y$. Writing $h_Y$ in terms of $h_1$ and $h_2$ is
 complicated and requires an interaction term $h_1(x)*h_2(x)$.
 Furthermore, while adding interaction terms is possible in this simple
 example it quickly becomes infeasible when $J$ becomes large, and does
-not provide gauruntees when the DGP is more complicated.
+not provide guarantees when the DGP is more complicated.
 
 Latent ensemble models such as BPS take latent draws from
 $H = (h_1,h_2)$ to get $(\hat{x}_1, \hat{x_2})$. Then, using the latent
@@ -290,7 +302,7 @@ bps_mean, bps_var = model.predict(a[-1,], A[-1,])
 plt.plot(dist_space, norm.pdf(dist_space, loc = means[0], scale = 1), color = "darkgreen", alpha = 0.5, label = "Agent 1")
 plt.plot(dist_space, norm.pdf(dist_space, loc = means[1], scale = 1), color = "darkgreen", alpha = 0.5, label = "Agent 2")
 plt.plot(dist_space, norm.pdf(dist_space, loc = mu_true, scale =sd_true)[0], color = "black", label = "Truth")
-plt.plot(dist_space, gaussian_kde(Y)(dist_space), color = "gray", label = "Oberseved")
+plt.plot(dist_space, gaussian_kde(Y)(dist_space), color = "gray", label = "Observed")
 plt.plot(dist_space, w1*norm.pdf(dist_space, loc = means[0], scale = 1) + (w2)*norm.pdf(dist_space, loc = means[1], scale = 1), color = "red", label = "BMA")
 plt.plot(dist_space, norm.pdf(dist_space, loc = bps_mean, scale =np.sqrt(bps_var)), color = "blue", label = "BPS")
 plt.title("Results of Comparison")
