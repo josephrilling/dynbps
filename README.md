@@ -174,7 +174,8 @@ print(predicted_variance)
 
 When combining predictive densities, most ensemble methods are linear
 combinations of the densities themselves.
-$$f(X) = \sum_{j=1:J} w_j h_j(X)$$
+
+$$f(X|A_{1:J}) = \sum_{j=1:J} w_j h_j(X)$$
 
 The most prominent example is Bayesian Model Averaging (BMA), where the
 weights are the posterior probability of the model (or agent), given the
@@ -203,9 +204,14 @@ have been used to great success. However, this example highlights a
 weakness in linear combination, one that we should not ignore in more
 complicated applications.
 
-Consider the following data generating process $$Y = 0.5*X_1 + 0.5*X_2$$
+Consider the following data generating process
+
+$$Y = 0.5*X_1 + 0.5*X_2$$
+
 where $X_1$ and $X_2$ are unobserved variables that are correlated via a
-bivariate normal distribution $$\begin{pmatrix}
+bivariate normal distribution
+
+$$\begin{pmatrix}
 X_1 \\ X_2 \end{pmatrix}\sim N\bigg(\begin{pmatrix}
 1 \\
 4
@@ -328,3 +334,12 @@ underparametrized, and struggle when agents are mispecified or
 codependent. Mispecification and codependencies are almost certain in
 real world applications, and latent synthesis methods, such as BPS, are
 among the best tools for the job.
+
+## Acknowledgements
+
+I would like to acknowledge the efforts of Srikar Katta in creating the
+inital draft of python code for BPS. He gratiously shared his code with
+me - giving me a strong launching point. Srikar is now studying for his
+PhD at Duke University. His webpage is located at
+https://scholars.duke.edu/person/srikar.katta/academic-experience. Thank
+you Srikar!
