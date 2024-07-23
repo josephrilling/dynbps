@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.55">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Python code for Dynamic BPS">
+
+<title>dynbps</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="dynbps">
+<meta property="og:description" content="Python code for Dynamic BPS">
+<meta property="og:site_name" content="dynbps">
+<meta name="twitter:title" content="dynbps">
+<meta name="twitter:description" content="Python code for Dynamic BPS">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">dynbps</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">dynbps</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">dynbps</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BPS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./loaddata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Load Datasets</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#install" id="toc-install" class="nav-link active" data-scroll-target="#install">Install</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a>
+  <ul class="collapse">
+  <li><a href="#base-level-oveview" id="toc-base-level-oveview" class="nav-link" data-scroll-target="#base-level-oveview">Base Level Oveview</a></li>
+  <li><a href="#dynamic-bps" id="toc-dynamic-bps" class="nav-link" data-scroll-target="#dynamic-bps">Dynamic BPS</a></li>
+  </ul></li>
+  <li><a href="#how-to-use" id="toc-how-to-use" class="nav-link" data-scroll-target="#how-to-use">How to use</a>
+  <ul class="collapse">
+  <li><a href="#step-0-read-in-the-data-and-set-priors" id="toc-step-0-read-in-the-data-and-set-priors" class="nav-link" data-scroll-target="#step-0-read-in-the-data-and-set-priors">Step 0: Read in the data and set priors</a></li>
+  <li><a href="#step-1-create-a-bps-object" id="toc-step-1-create-a-bps-object" class="nav-link" data-scroll-target="#step-1-create-a-bps-object">Step 1: Create a BPS object</a></li>
+  <li><a href="#step-2-fit-the-model" id="toc-step-2-fit-the-model" class="nav-link" data-scroll-target="#step-2-fit-the-model">Step 2: Fit the model</a></li>
+  <li><a href="#step-3-predict-the-next-outcome" id="toc-step-3-predict-the-next-outcome" class="nav-link" data-scroll-target="#step-3-predict-the-next-outcome">Step 3: Predict the next outcome</a></li>
+  </ul></li>
+  <li><a href="#motivating-example" id="toc-motivating-example" class="nav-link" data-scroll-target="#motivating-example">Motivating Example</a></li>
+  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements">Acknowledgements</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/josephrilling/dynbps/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">dynbps</h1>
+</div>
+
+<div>
+  <div class="description">
+    Python code for Dynamic BPS
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="install" class="level2">
+<h2 class="anchored" data-anchor-id="install">Install</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install dynbps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<section id="base-level-oveview" class="level3">
+<h3 class="anchored" data-anchor-id="base-level-oveview">Base Level Oveview</h3>
+<p>Bayesian Predictive Synthesis (BPS) is an ensemble method designed to aggregate and synthesize density predictions from multiple agents/experts/judges. There is quite a wide field of literature for ensembling point forecasts, but point forecasts are very limited because they do not convey uncertainty. The shape and variance of a distribution is equally important as the mean. Therefore, consider soliciting density predictions from <span class="math inline">\(J\)</span> judges. Each judge, <span class="math inline">\(j = 1,...,J\)</span> gives a density <span class="math inline">\(h_j(\cdot)\)</span>. The set of these predictions is <span class="math inline">\(H = \{h_1(\cdot), ... , h_J(\cdot)\}\)</span>. We would like to predict an outcome <span class="math inline">\(y\)</span>, given this information <span class="math inline">\(H\)</span>. Typically, in Bayesian analysis, we would find the posterior <span class="math inline">\(p(y|H)\)</span> and be done with it. However, the posterior is found via <span class="math inline">\(p(y|H) \propto p(H|y)p(y)\)</span>, and <span class="math inline">\(p(H|y)\)</span> is either impossible to find or necessitates significant modeling assumptions, making the value highly subjective.</p>
+<p>If we introduce a latent variable <span class="math inline">\(\vec{x}\)</span>, then we can write the posterior as <span class="math display">\[p(y|H) = \int_{\vec{x}}p(y|\vec{x}, H)p(\vec{x}|H)d\vec{x}\]</span></p>
+<p>We can also assume <span class="math inline">\((y|\vec{x}) \perp H\)</span>, simplifying the posterior <span class="math display">\[p(y|H) = \int_{\vec{x}}p(y|\vec{x})p(\vec{x}|H)d\vec{x}\]</span></p>
+<p>Let’s say that the latent variable <span class="math inline">\(\vec{x}\)</span> is a J-dimensional random variable from <span class="math inline">\(\vec{x}\sim p(\vec{x}|H)\)</span>. The next question is how to we get <span class="math inline">\(\vec{x} \sim p(\vec{x}|H)\)</span>? Quite simply, we can say these latent variables are “generated independently from the <span class="math inline">\(h_j\)</span>”, that is <span class="math inline">\(x_j \sim h_j(\cdot)\)</span> for <span class="math inline">\(j=1:J\)</span>, and then <span class="math inline">\(\vec{x} = (x_1,..., x_J)\)</span>. Due to independence of the random draws, we can write: <span class="math display">\[p(y|H) = \int_{\vec{x}}p(y|\vec{x})\prod_{j=1:J} h_j(x_j) d\vec{x}\]</span></p>
+<p>Now, how do we formulate <span class="math inline">\(p(y|\vec{x})\)</span>? It’s actually not too complicated! We are given covariates <span class="math inline">\(\vec{x}\)</span>, and asked to predict an outcome <span class="math inline">\(y\)</span>. Therefore, we can use tools that we are all familiar with, such as a linear regression. One of the nice things about BPS is that this conditional density <span class="math inline">\(p(y|\vec{x})\)</span>, or “synthesis function”, is not set in stone. There are limitless choices, and you can use your favorite method in this role. In traditional BPS literature, we use the symbol <span class="math inline">\(\alpha(y|\vec{x})\)</span> to represent this synthesis function.</p>
+</section>
+<section id="dynamic-bps" class="level3">
+<h3 class="anchored" data-anchor-id="dynamic-bps">Dynamic BPS</h3>
+<p>This package implements a dynamic version of BPS. The synthesis function follows a dynamic linear model (Prado and West Chapter 4). A dynamic linear model (DLM) predicts a time series outcome <span class="math inline">\(y_t\)</span> for <span class="math inline">\(t=1:T\)</span>, and can be described by a pair of equations. First there is an observation equation: <span class="math display">\[y_t = \vec{F}_t\vec{\theta}_t + \nu_t\]</span> In the observation equation, <span class="math inline">\(\vec{F}_t\)</span> is the covariate vector. This vector is known and contains all the predictors. In BPS, an example is <span class="math inline">\(\vec{F}_t = (1, x_{1,t}, x_{2,t}, ..., x_{J,t})\)</span>, where <span class="math inline">\(x_{j,t}\)</span> is a latent draw from Judge j’s prediction at time t, and 1 is a constant that allows for an intercept term. The <span class="math inline">\(\vec{\theta}_t\)</span> are unobserved states, which act as the coefficients to the covariates in <span class="math inline">\(\vec{F}_t\)</span>. Finally, <span class="math inline">\(\nu_t\)</span> is the measurement noise. The coefficients, <span class="math inline">\(\vec{\theta}_t\)</span>, evolve via a second equation: <span class="math display">\[\vec{\theta}_t = G_t\vec{\theta}_{t-1} + \vec{w}_t  \]</span></p>
+<p><span class="math inline">\(G_t\)</span> is called the state evolution matrix, and <span class="math inline">\(\vec{w}_t\)</span> is noise in this process. In this implementation, <span class="math inline">\(G_t =I\)</span>, and the states evolve via a random walk.</p>
+<p>This pair of equations describes the DLM that is our aforementioned synthesis function, which now varies through time <span class="math inline">\(\alpha_t(y_t|\vec{x}_t)\)</span></p>
+<p>Going through time, the math behind dynamic BPS is quite involved. An arxiv of the orginal paper by McAlinn and West can be found at https://arxiv.org/abs/1601.07463. In broad strokes, BPS works by sampling latent states from the posterior given by the DLM, and then builds the DLM using these states and continues to alternate between sampling and building for the pre-specified number of MCMC iterations. This back and fourth is closely related to the Forward Filter Backwards Smoothing algorithm (Prado and West Chapter 4), and allows BPS to correct for agent biases, codependencies, and mispecifications</p>
+</section>
+</section>
+<section id="how-to-use" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use">How to use</h2>
+<p>There are three steps to using this method. First, create an object using the training information. Second, use the .fit() method to fit the model to the training data. Finally, use the .predict() method, which takes the new agent means, variances, and degrees of freedom as arguments, to predict the outcome at time T+1. Inflation forecasting data, originally provided at https://www2.stat.duke.edu/~mw/mwsoftware/BPS/index.html, is made available through the dynbps package, and is used in this example</p>
+<section id="step-0-read-in-the-data-and-set-priors" class="level3">
+<h3 class="anchored" data-anchor-id="step-0-read-in-the-data-and-set-priors">Step 0: Read in the data and set priors</h3>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>yI, a, A, n <span class="op">=</span> loadDataInf()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> yI.shape[<span class="dv">0</span>] <span class="co"># total time in analysis</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>J <span class="op">=</span> a.shape[<span class="dv">1</span>] <span class="co"># number of agents</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> J <span class="op">+</span> <span class="dv">1</span> <span class="co"># number of agents plus intercept</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># set priors</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>delta <span class="op">=</span> [<span class="fl">0.95</span>, <span class="fl">0.99</span>] <span class="co"># discount factors </span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>m_0 <span class="op">=</span> np.ones(shape <span class="op">=</span> [J <span class="op">+</span> <span class="dv">1</span>])<span class="op">/</span>J <span class="co"># prior mean for agent coefficients </span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>m_0[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">0</span> <span class="co"># prior mean for intercept</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>C_0 <span class="op">=</span> np.eye(p) <span class="op">*</span> <span class="dv">1</span> <span class="co"># prior for covariance matrix</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>n_0 <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span> <span class="op">-</span> delta[<span class="dv">1</span>]) <span class="co"># prior on BPS degrees of freedom</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>s_0 <span class="op">=</span> <span class="fl">0.01</span> <span class="co"># prior on BPS observation variance </span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>burn_in, mcmc_iter <span class="op">=</span> <span class="dv">2000</span>, <span class="dv">3000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-1-create-a-bps-object" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-create-a-bps-object">Step 1: Create a BPS object</h3>
+<p>When creating the BPS object, I provide all inputs. The user must specify the first three inputs: target series, agent means, and agent variances. If the degrees of freedom are not given, they default to 30, effectively implementing a normal distribution instead of a t-distribution. The default entries for all other parameters are equal to their respective values in the code above.</p>
+<div id="cell-14" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Remove the last observation to prevent data leak</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>yT <span class="op">=</span> yI[<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>aT <span class="op">=</span> a[<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>,]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>AT <span class="op">=</span> A[<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>,]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>nT <span class="op">=</span> n[<span class="dv">0</span>:<span class="op">-</span><span class="dv">1</span>,]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> BPS(yT,aT,AT,nT,delta,m_0,C_0,n_0,s_0,burn_in,mcmc_iter)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-2-fit-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-fit-the-model">Step 2: Fit the model</h3>
+<p>Now that the object is created, we can fit the model using the .fit() method. The .fit() method will print out the current MCMC iteration every 1000 iterations. The total number of iterations is burn_in + mcmc_iter = 5000. This process may take a minute.</p>
+<div id="cell-16" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model.fit()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0
+1000
+2000
+3000
+4000</code></pre>
+</div>
+</div>
+</section>
+<section id="step-3-predict-the-next-outcome" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-predict-the-next-outcome">Step 3: Predict the next outcome</h3>
+<p>Finally, feed the new agent means <span class="math inline">\(a\)</span>, variances <span class="math inline">\(A\)</span>, and degrees of freedom <span class="math inline">\(n\)</span> into the .predict() method. The .predict() method returns a point prediction (predictive mean), as well as the lower and upper bounds of the predictive credible interval. The width of the interval is controlled by ci_width, which by default is set to 95.</p>
+<p>The predictive distribution from BPS is not necessarily normal. Therefore, the best we can do is sample from the predictive distribution. This sampling is acheived by sampling from the predictive distribution of each MCMC iteration individually. The number of samples from each MCMC iteration is controlled by samples_per, which by default is set to 1.</p>
+<p>After running model.predict(), the model gains a new attribute .pred_sample, which contains the aforementioned predictive sample.</p>
+<div id="cell-18" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a_new <span class="op">=</span> a[<span class="op">-</span><span class="dv">1</span>,]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>A_new <span class="op">=</span> A[<span class="op">-</span><span class="dv">1</span>,]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>n_new <span class="op">=</span> n[<span class="op">-</span><span class="dv">1</span>,]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>predicted_mean, ci_low, ci_high <span class="op">=</span> model.predict(a_new, A_new, n_new, ci_width <span class="op">=</span> <span class="dv">90</span>, samples_per <span class="op">=</span> <span class="dv">5</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(predicted_mean)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ci_low, ci_high)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>dist_space <span class="op">=</span> linspace( <span class="dv">0</span>, <span class="fl">2.5</span>, <span class="dv">1000</span> )</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, gaussian_kde(model.pred_sample)(dist_space), color <span class="op">=</span> <span class="st">"blue"</span>, label <span class="op">=</span> <span class="st">"BPS"</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Predictive Density for Inflation"</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1.6024507046109373
+1.2608408276082264 1.9486134417500363</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-5-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="motivating-example" class="level2">
+<h2 class="anchored" data-anchor-id="motivating-example">Motivating Example</h2>
+<p>When combining predictive densities, most ensemble methods are linear combinations of the densities themselves.</p>
+<p><span class="math display">\[f(X|A_{1:J}) = \sum_{j=1:J} w_j h_j(X)\]</span></p>
+<p>The most prominent example is Bayesian Model Averaging (BMA), where the weights are the posterior probability of the model (or agent), given the data <span class="math inline">\(D\)</span></p>
+<p><span class="math display">\[w_k = P(A_k|D) = \frac{P(D|A_k)P(A_k)}{\sum_{j=1:J} P(D|A_j)P(A_j)}\]</span></p>
+<p>This linear combination of the densities is intuitive and useful, but it is ultimately underparametrized. When the agents are correlated and/or misspecified, the linear combination of the densities struggles. In many cases, linear combination methods converge to one singular model (the one that has performed best so far), throwing away the potential information in the correlation structure of the agent predictions. Furthermore, in the likely situation where the forecasting problem is “<span class="math inline">\(M-open\)</span>”, (none of the models are correct) the underparamterization of the ensemble is exacerbated.</p>
+<p>In this section, I present a simple motivating example that I hope will educate the reader on latent synthesis, and bolster their understanding of BPS. This example is in the “<span class="math inline">\(M-open\)</span>” setting, where all agents are incorrected. The agents are not correlated, and are constant through time. These simplifications are intentional, and are designed to highlight the advantages of latent synthesis. I want to acknowledge that there are many examples where BMA and other linear density combinations have been used to great success. However, this example highlights a weakness in linear combination, one that we should not ignore in more complicated applications.</p>
+<p>Consider the following data generating process</p>
+<p><span class="math display">\[Y = 0.5*X_1 + 0.5*X_2\]</span></p>
+<p>where <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> are unobserved variables that are correlated via a bivariate normal distribution</p>
+<p><span class="math display">\[\begin{pmatrix}
+X_1 \\ X_2 \end{pmatrix}\sim N\bigg(\begin{pmatrix}
+1 \\
+4
+\end{pmatrix},\begin{pmatrix}
+1 &amp; 0.5\\
+0.5 &amp; 1
+\end{pmatrix}\bigg)\]</span></p>
+<p>Assume that there are 100 observations of <span class="math inline">\(Y\)</span> and a decision maker wants to use two agents in an ensemble. Agent 1 always submits density forecast <span class="math inline">\(h_1(\cdot) := N(1,1)\)</span>, and Agent 2 always submits <span class="math inline">\(h_2(\cdot):=N(4,1)\)</span>. The agents struggle at predicting <span class="math inline">\(Y\)</span>, but they perfectly describe the marginal distributions of <span class="math inline">\(X_1\)</span>, and <span class="math inline">\(X_2\)</span>. Therefore, the decision maker has all the necessary information to create a reasonable ensemble forecast for <span class="math inline">\(Y\)</span>.</p>
+<div id="cell-21" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#### Code for Generating Y</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">4</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> [<span class="dv">1</span>,<span class="dv">4</span>]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="bu">vars</span> <span class="op">=</span> [<span class="dv">1</span>,<span class="dv">1</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>Sigma <span class="op">=</span> np.matrix([[<span class="bu">vars</span>[<span class="dv">0</span>],<span class="fl">0.5</span>],[<span class="fl">0.5</span>,<span class="bu">vars</span>[<span class="dv">1</span>]]])</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.random.multivariate_normal(means, Sigma, n).T</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">0.5</span><span class="op">*</span>X[<span class="dv">0</span>] <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>X[<span class="dv">1</span>]</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">### Calculating True Distribution of Y</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> np.matrix([<span class="fl">0.5</span>,<span class="fl">0.5</span>])</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>mu_true <span class="op">=</span> np.matmul(transform, means)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>var_true <span class="op">=</span> np.matmul(np.matmul(transform, Sigma), transform.T)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>sd_true <span class="op">=</span> np.sqrt(var_true)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Below, I create a plot that shows the true density of <span class="math inline">\(Y\)</span> (black), the observed density of <span class="math inline">\(Y\)</span> (gray), and the predicted densities from the agents (green). In light red, I show the range of possible results from a linear ensemble of the agent densities, when weights are restricted to the unit simplex. It is important to note that the unit simplex includes <span class="math inline">\((w_1, w_2) = (1,0)\)</span> and <span class="math inline">\((w_1, w_2)= (0,1)\)</span>, where the ensemble converges to one of the agents.</p>
+<div id="cell-23" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dist_space <span class="op">=</span> linspace( <span class="op">-</span><span class="dv">3</span>, <span class="dv">8</span>, <span class="dv">1000</span> ) <span class="co">## For evaluation of the KDE for Y</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">0</span>], scale <span class="op">=</span> <span class="dv">1</span>), color <span class="op">=</span> <span class="st">"darkgreen"</span>, alpha <span class="op">=</span> <span class="fl">0.9</span>, label <span class="op">=</span> <span class="st">"Agents"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">1</span>], scale <span class="op">=</span> <span class="dv">1</span>), color <span class="op">=</span> <span class="st">"darkgreen"</span>, alpha <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, norm.pdf(dist_space, loc <span class="op">=</span> mu_true, scale <span class="op">=</span>sd_true)[<span class="dv">0</span>], color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> <span class="st">"Truth"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, gaussian_kde(Y)(dist_space), color <span class="op">=</span> <span class="st">"gray"</span>, label <span class="op">=</span> <span class="st">"Observed"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">11</span>):</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  plt.plot(dist_space, (j<span class="op">/</span><span class="dv">10</span>)<span class="op">*</span>norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">0</span>], scale <span class="op">=</span> <span class="dv">1</span>) <span class="op">+</span> ((<span class="dv">10</span><span class="op">-</span>j)<span class="op">/</span><span class="dv">10</span>)<span class="op">*</span>norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">1</span>], scale <span class="op">=</span> <span class="dv">1</span>), color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">.2</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Possible Combinations"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From this plot, it is clear that no linear combination of densities with weights on the unit simplex will give a satisfactory result. In fact, no linear combination, even without restriction on weights, will capture the distribution of <span class="math inline">\(Y\)</span>. Writing <span class="math inline">\(h_Y\)</span> in terms of <span class="math inline">\(h_1\)</span> and <span class="math inline">\(h_2\)</span> is complicated and requires an interaction term <span class="math inline">\(h_1(x)*h_2(x)\)</span>. Furthermore, while adding interaction terms is possible in this simple example it quickly becomes infeasible when <span class="math inline">\(J\)</span> becomes large, and does not provide guarantees when the DGP is more complicated.</p>
+<p>Latent ensemble models such as BPS take latent draws from <span class="math inline">\(H = (h_1,h_2)\)</span> to get <span class="math inline">\((\hat{x}_1, \hat{x}_2)\)</span>. Then, using the latent draws, BPS will predict <span class="math inline">\(Y\)</span> through the synthesis function. Therefore, while latent synthesis sounds intimidating, and its strong performance makes people assume it is complex, the underlying motivation is quite intuitive. Combining densities directly creates an inflexible ensemble. Combining latent draws from a distribution helps combat misspecification and codependencies between agents.</p>
+<div id="cell-25" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Code Updating Plot with BPS and BMA</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">### BMA: Find Posterior Model Probabilities </span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>M1L <span class="op">=</span> <span class="bu">sum</span>(np.log(norm.pdf(Y, loc <span class="op">=</span> means[<span class="dv">0</span>], scale <span class="op">=</span> <span class="dv">1</span>)))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>M2L <span class="op">=</span> <span class="bu">sum</span>(np.log(norm.pdf(Y, loc <span class="op">=</span> means[<span class="dv">1</span>], scale <span class="op">=</span> <span class="dv">1</span>)))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> np.exp(M1L)<span class="op">/</span>(np.exp(M1L) <span class="op">+</span> np.exp(M2L))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> np.exp(M2L)<span class="op">/</span>(np.exp(M1L) <span class="op">+</span> np.exp(M2L))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.tile(np.array(means), (<span class="dv">100</span>, <span class="dv">1</span>)) <span class="co">## Create input mean array for BPS</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.tile(np.array(<span class="bu">vars</span>),(<span class="dv">100</span>,<span class="dv">1</span>)) <span class="co">## Create input variance array for BPS</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> BPS(y<span class="op">=</span>Y[:<span class="op">-</span><span class="dv">1</span>,], a_j<span class="op">=</span>a[:<span class="op">-</span><span class="dv">1</span>,], A_j <span class="op">=</span> A[:<span class="op">-</span><span class="dv">1</span>,], s_0 <span class="op">=</span> <span class="dv">1</span>, mcmc_iter <span class="op">=</span> <span class="dv">500</span>, burn_in <span class="op">=</span> <span class="dv">500</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>model.fit()</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#bps_mean, bps_var = model.predict(a[-1,], A[-1,])</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>bps_mean, bps_ci_low, bps_ci_high <span class="op">=</span> model.predict(a[<span class="op">-</span><span class="dv">1</span>,], A[<span class="op">-</span><span class="dv">1</span>,])</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">0</span>], scale <span class="op">=</span> <span class="dv">1</span>), color <span class="op">=</span> <span class="st">"darkgreen"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, label <span class="op">=</span> <span class="st">"Agent 1"</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">1</span>], scale <span class="op">=</span> <span class="dv">1</span>), color <span class="op">=</span> <span class="st">"darkgreen"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, label <span class="op">=</span> <span class="st">"Agent 2"</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, norm.pdf(dist_space, loc <span class="op">=</span> mu_true, scale <span class="op">=</span>sd_true)[<span class="dv">0</span>], color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> <span class="st">"Truth"</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, gaussian_kde(Y)(dist_space), color <span class="op">=</span> <span class="st">"gray"</span>, label <span class="op">=</span> <span class="st">"Observed"</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, w1<span class="op">*</span>norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">0</span>], scale <span class="op">=</span> <span class="dv">1</span>) <span class="op">+</span> (w2)<span class="op">*</span>norm.pdf(dist_space, loc <span class="op">=</span> means[<span class="dv">1</span>], scale <span class="op">=</span> <span class="dv">1</span>), color <span class="op">=</span> <span class="st">"red"</span>, label <span class="op">=</span> <span class="st">"BMA"</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>plt.plot(dist_space, gaussian_kde(model.pred_sample)(dist_space), color <span class="op">=</span> <span class="st">"blue"</span>, label <span class="op">=</span> <span class="st">"BPS"</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co">#plt.plot(dist_space, norm.pdf(dist_space, loc = bps_mean, scale =np.sqrt(bps_var)), color = "blue", label = "BPS")</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Results of Comparison"</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We see above that BMA converges to one of our mispecified agents. On the other hand, BPS is able to overcome the agent mispecification and give an accurate distribution for <span class="math inline">\(Y\)</span>.</p>
+<p>Linear density combinations can give great results, but they are underparametrized, and struggle when agents are mispecified or codependent. Mispecification and codependencies are almost certain in real world applications, and latent synthesis methods, such as BPS, are among the best tools for the job.</p>
+</section>
+<section id="acknowledgements" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgements">Acknowledgements</h2>
+<p>I would like to acknowledge the efforts of Srikar Katta in creating the inital draft of python code for BPS. He gratiously shared his code with me - giving me a strong launching point. Srikar is now studying for his PhD at Duke University. His webpage is located at https://scholars.duke.edu/person/srikar.katta/academic-experience. Thank you Srikar!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/josephrilling\.github\.io\/dynbps");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/josephrilling/dynbps/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
