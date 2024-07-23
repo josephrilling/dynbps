@@ -15,16 +15,16 @@ class BPS:
     
     def __init__(self, 
                  y:list, #The true values
-                 a_j:'T by J matrix', #Each agent's predicted mean
-                 A_j:'T by J matrix', #Each agent's predicted variance
-                 n_j:'T by J matrix'=None, #Each agent's predicted degrees of freedom
+                 a_j, #Each agent's predicted mean "T x J matrix"
+                 A_j, #Each agent's predicted variance "T x J matrix"
+                 n_j= None, #Each agent's predicted degrees of freedom "T x J matrix"
                  delta:list = None, #Discount factor on [state, observation]
                  m_0:list = None, #Prior for coefficients of agent's
-                 C_0:"J by J matrix"= None, #Prior for covariance of agent's
+                 C_0= None, #Prior for covariance of agent's "J x J matrix"
                  n_0:list= None, #Prior for degrees of freedom
                  s_0:float = None, #Prior for observation variance
                  burn_in:int = None, #Iterations for burn in
-                 mcmc_iter:int = None): #Iterations to keep
+                 mcmc_iter:int = None):#Iterations to keep
         self.y = y
         self.a_j = a_j
         self.A_j = A_j
@@ -169,9 +169,18 @@ class BPS:
         self.R_k_samples = R_k[(p * burn_in):, :]
         self.v_k_samples = v_k[burn_in:, :]
         self.a_k = self.a_k_samples.mean(axis=0)
-    def predict(self,a_new, A_new, n_new=None):
+    def predict(self,
+                a_new, 
+                A_new, 
+                n_new=None, 
+                ci_width=None, 
+                samples_per:int = None): #Sample size per distribution):
         if n_new is None:
             n_new = np.full(self.p_x,30)
+        if ci_width is None:
+            ci_width = 95 # default to 95% credible interval 
+        if samples_per is None:
+            samples_per = 1 # default to one sample per mcmc predictive distribution 
         def std_var(x):
             return (x + np.transpose(x))/2
 
@@ -184,19 +193,30 @@ class BPS:
         delta = self.delta
         mcmc_iter = self.mcmc_iter
         p = self.p
-        E_BPS = np.zeros(shape = [mcmc_iter, 1]) # posterior BPS mean
-        V_BPS = np.zeros(shape = [mcmc_iter, 1]) # posterior BPS variance
+        E_tracker = np.zeros(shape = [mcmc_iter, 1]) # posterior BPS mean
+        V_tracker = np.zeros(shape = [mcmc_iter, 1]) # posterior BPS variance
         error = np.zeros(shape = [mcmc_iter, 1])
         mlike = np.zeros(shape = [mcmc_iter, 1])
         for i in range(self.mcmc_iter):
         # sample x(t + 1)
             lambda_ = np.sqrt(0.5 * delta[1] * n/np.random.gamma(shape = delta[1] * n/2)) 
             x_t = np.append(np.array([1]), a + lambda_ * np.matmul(np.random.normal(size = [1, self.p_x]), chol(std_var(np.diag(A)))))
-            E_BPS[i] = np.matmul(x_t, self.a_k_samples[i, :])
-            V_BPS[i] = np.matmul(x_t, np.matmul(self.R_k_samples[(p*i):(p*(i + 1)), :], x_t.reshape([x_t.shape[0], 1]))) + self.v_k_samples[i, :]
+            E_tracker[i] = np.matmul(x_t, self.a_k_samples[i, :])
+            V_tracker[i] = np.matmul(x_t, np.matmul(self.R_k_samples[(p*i):(p*(i + 1)), :], x_t.reshape([x_t.shape[0], 1]))) + self.v_k_samples[i, :]
             #mlike[i, t] = np.exp(np.log(ss.gamma(0.5 * (nu[t] + 1))) - np.log(ss.gamma(0.5 * nu[t])) - 0.5 * np.log(np.pi * nu[t] * V_BPS[i, t]) - (0.5 * (nu[t] + 1)) * np.log(1 + 1/(nu[t] * V_BPS[i, t]) * (yI[t + 1] - E_BPS[i, t]))**2)
-        self.prediction = E_BPS.mean()
-        self.variance = V_BPS.mean()
-        result = [self.prediction, self.variance]
-        return(result)
+        
+        ### New here
+        self.means = E_tracker
+        self.variances = V_tracker
+        predictive_samples_mat = np.random.normal(E_tracker,V_tracker, size =(E_tracker.size, samples_per))
+        self.pred_sample = predictive_samples_mat.flatten()
+        self.point = self.pred_sample.mean()
+        ci_margin = (100-ci_width)/2
+        percentile_low = ci_margin
+        percentile_high = ci_width + ci_margin
+
+
+        self.ci_low = np.percentile(self.pred_sample, percentile_low)
+        self.ci_high = np.percentile(self.pred_sample, percentile_high)
+        return(self.point, self.ci_low, self.ci_high)
         
